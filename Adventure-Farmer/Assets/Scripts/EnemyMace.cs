@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyMace : MonoBehaviour
@@ -19,6 +17,6 @@ public class EnemyMace : MonoBehaviour
     void Update()
     {
         transform.position = startPos + amplitube * new Vector3(0f, Mathf.Sin(Time.time), 0f);
-        
+
     }
 }

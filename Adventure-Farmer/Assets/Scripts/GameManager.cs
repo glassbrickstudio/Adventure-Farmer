@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("destroying new instance");
             Destroy(gameObject);
-        
+
         }
     }
 

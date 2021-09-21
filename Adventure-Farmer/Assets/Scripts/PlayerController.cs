@@ -1,8 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -25,42 +24,32 @@ public class PlayerController : MonoBehaviour
     private AudioSource audiosource;
 
     private bool isAlive;
-    
+
+    float inputX;
+    float jumpForce;
 
 
 
 
     private void Awake()
     {
-        playerActionControls = new PlayerActionControls();
+       
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         audiosource = GetComponent<AudioSource>();
-       
-    }
 
-  
-
-    private void OnEnable()
-    {
-        playerActionControls.Enable();
-        
     }
 
 
 
-    private void OnDisable()
-    {
-        playerActionControls.Disable();
-    }
 
 
 
     void Start()
     {
-        playerActionControls.Land.Jump.performed += _ => Jump();
+        
         deathSound = Resources.Load<AudioClip>("DeathFail8Bit");
         isAlive = true;
     }
@@ -76,20 +65,45 @@ public class PlayerController : MonoBehaviour
 
 
 
-    private void Move()
+    public void GetInputMove(InputAction.CallbackContext context)
     {
         //read the movement value
-        float movementInput = playerActionControls.Land.Move.ReadValue<float>();
+        inputX = context.ReadValue<Vector2>().x;
 
+        
+
+    }
+
+    public void Jump(InputAction.CallbackContext context)
+    {
+
+        if (context.performed && isGrounded())
+        {
+            rb.AddForce(new Vector2(0, jumpSpeed), ForceMode2D.Impulse);
+
+            //animation
+            animator.SetTrigger("Jump");
+
+
+        }
+
+
+
+    }
+
+    private void Move()
+    {
         //move the player
         Vector3 currentPosition = transform.position;
-        currentPosition.x += movementInput * speed * Time.deltaTime;
+        currentPosition.x += inputX * speed * Time.deltaTime;
 
+
+        //move position
         transform.position = currentPosition;
 
 
         //animation
-        if (movementInput != 0)
+        if (inputX != 0)
         {
             animator.SetBool("Run", true);
 
@@ -101,34 +115,18 @@ public class PlayerController : MonoBehaviour
         }
 
         //sprite flip
-        if (movementInput == -1)
+        if (inputX < -0.1f)
         {
             spriteRenderer.flipX = true;
 
         }
-        else if (movementInput == 1)
+        else if (inputX > 0.1f)
         {
             spriteRenderer.flipX = false;
-        
+
         }
-
     }
-
-
-    private void Jump()
-    {
-        if (isGrounded())
-        {
-            rb.AddForce(new Vector2(0, jumpSpeed), ForceMode2D.Impulse);
-
-            //animation
-            animator.SetTrigger("Jump");
-        
-        
-        }
-    
-    
-    }
+   
 
     private bool isGrounded()
     {
@@ -141,8 +139,8 @@ public class PlayerController : MonoBehaviour
         bottomRight.y -= col.bounds.extents.y;
 
         return Physics2D.OverlapArea(topLeftPoint, bottomRight, ground);
-    
-    
+
+
     }
 
 
@@ -152,11 +150,11 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Enemy") && isAlive)
         {
             isAlive = false;
-            
+
             StartCoroutine(PlaySound());
-            
+
         }
-        
+
     }
 
 
@@ -174,8 +172,8 @@ public class PlayerController : MonoBehaviour
         yield return new WaitUntil(() => audiosource.isPlaying == false);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
-        
-    
+
+
     }
 
 
