@@ -27,6 +27,13 @@ public class PlayerController : MonoBehaviour
 
     float inputX;
     float jumpForce;
+    public Transform groundCheck;
+
+    private bool isGrounded;
+
+   
+
+
 
 
 
@@ -63,6 +70,18 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    private void FixedUpdate()
+    {
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, ground);
+        
+        
+    }
+
+
+    void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(groundCheck.position, 0.2f);
+    }
 
 
     public void GetInputMove(InputAction.CallbackContext context)
@@ -77,7 +96,7 @@ public class PlayerController : MonoBehaviour
     public void Jump(InputAction.CallbackContext context)
     {
 
-        if (context.performed && isGrounded())
+        if (context.performed && isGrounded)
         {
             rb.AddForce(new Vector2(0, jumpSpeed), ForceMode2D.Impulse);
 
@@ -128,20 +147,7 @@ public class PlayerController : MonoBehaviour
     }
    
 
-    private bool isGrounded()
-    {
-        Vector2 topLeftPoint = transform.position;
-        topLeftPoint.x -= col.bounds.extents.x;
-        topLeftPoint.y += col.bounds.extents.y;
-
-        Vector2 bottomRight = transform.position;
-        bottomRight.x += col.bounds.extents.x;
-        bottomRight.y -= col.bounds.extents.y;
-
-        return Physics2D.OverlapArea(topLeftPoint, bottomRight, ground);
-
-
-    }
+  
 
 
 
